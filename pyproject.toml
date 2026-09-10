@@ -1,0 +1,43 @@
+[project]
+name = "fyp-prototype-version-01"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Dunith Munasinghe", email = "113714394+Dunith-M@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.1.1",
+    "django-htmx>=1.29.0",
+    "lightgbm>=4.7.0",
+    "openpyxl>=3.1.5",
+    "ortools>=9.15.6755",
+    "pandas>=3.0.5",
+    "pandera>=0.33.1",
+    "psycopg[binary]>=3.3.5",
+    "pyarrow>=25.0.1",
+    "pydantic>=2.13.5",
+    "python-dotenv>=1.2.3",
+    "scikit-learn>=1.9.0",
+    "whitenoise>=6.12.0",
+]
+
+[project.scripts]
+fyp-prototype-version-01 = "fyp_prototype_version_01:main"
+
+[build-system]
+requires = ["uv_build>=0.12.12,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "bandit>=1.9.4",
+    "hypothesis>=6.168.0",
+    "mypy>=2.3.1",
+    "pip-audit>=2.10.1",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.16.6",
+]
