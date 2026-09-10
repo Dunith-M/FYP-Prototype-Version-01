@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# Singer data
+data/raw/
+data/staging/
+data/processed/
+data/artifacts/
+
+# Models / outputs
+*.pkl
+*.joblib
+*.parquet
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
