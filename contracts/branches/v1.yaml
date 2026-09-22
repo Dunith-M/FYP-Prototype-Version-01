@@ -1,0 +1,162 @@
+dataset: branches
+version: 1
+source_file: branch_profile.xlsx
+source_sheet: Branch Profile
+description: >
+  Pilot-branch profile source used by the Singer FYP MVP.
+
+required_columns:
+  - SHOP_CODE
+  - SHOP_NAME
+
+columns:
+  SHOP_CODE:
+    type: string
+    required: true
+    nullable: false
+    role: branch_primary_key
+  SHOP_NAME:
+    type: string
+    required: true
+    nullable: false
+    role: branch_name
+  SHOP_TYPE:
+    type: string
+    required: false
+    nullable: false
+    role: branch_attribute
+  FLOOR_AREA_SQFT:
+    type: numeric
+    required: false
+    nullable: false
+    role: branch_attribute
+  CUSTOMER_SEGMENT:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  HIGH_TRAFFIC_DAYS:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  PEAK_MONTHS:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  AVG_DAILY_UNITS_MIN:
+    type: numeric
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  AVG_DAILY_UNITS_MAX:
+    type: numeric
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  AVG_MONTHLY_UNITS_MIN:
+    type: numeric
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  AVG_MONTHLY_UNITS_MAX:
+    type: numeric
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  FAST_MOVING_CATEGORIES:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  SLOW_MOVING_CATEGORIES:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  TOURIST_EFFECT:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  TOURIST_SEASON_MONTHS:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  TOURIST_SEASON_TOP_CATEGORIES:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  FESTIVAL_EFFECT:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  FESTIVAL_PERIODS:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  FESTIVAL_TOP_CATEGORIES:
+    type: string
+    required: false
+    nullable: true
+    role: branch_profile_attribute
+  LOCAL_DEMAND_NOTES:
+    type: string
+    required: false
+    nullable: false
+    role: branch_profile_attribute
+  PROFILE_SOURCE:
+    type: string
+    required: false
+    nullable: false
+    role: source_metadata
+  FORMAL_APPROVAL_STATUS:
+    type: string
+    required: false
+    nullable: false
+    role: approval_metadata
+  REFERENCE_PERIOD_START:
+    type: date
+    required: false
+    nullable: false
+    role: reference_period_boundary
+  REFERENCE_PERIOD_END:
+    type: date
+    required: false
+    nullable: false
+    role: reference_period_boundary
+  DATA_COMPLETENESS:
+    type: string
+    required: false
+    nullable: false
+    role: source_metadata
+  NOTES:
+    type: string
+    required: false
+    nullable: true
+    role: audit_context
+
+key_expectations:
+  - column: SHOP_CODE
+    expectation: present, non-null, and unique; represents the pilot branch code
+
+schema_expectations:
+  expected_column_count: 26
+  missing_required_columns_policy: fail_validation
+  unexpected_columns_policy: report_only
+  unique_columns:
+    - SHOP_CODE
+  expected_distinct_values:
+    SHOP_CODE:
+      expected_count: 10
+      validation_action: report_only
+
+notes:
+  - Contract describes expected input schema only; it does not clean or transform source data.
+  - The expected ten pilot branch codes are a validation expectation, not a data-modification instruction.
+  - Profile attributes are documented as supplied and are not treated as current Singer policy or operational constraints.

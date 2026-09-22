@@ -1,0 +1,107 @@
+dataset: calendar
+version: 1
+source_file: calendar_data.xlsx
+source_sheet: Sheet1
+description: >
+  Date dimension and calendar context source used by the Singer FYP MVP.
+
+required_columns:
+  - DATE
+
+columns:
+  DATE:
+    type: date
+    required: true
+    nullable: false
+    role: primary_date_key
+  YEAR:
+    type: integer
+    required: false
+    nullable: false
+    role: calendar_attribute
+  MONTH:
+    type: integer
+    required: false
+    nullable: false
+    role: calendar_attribute
+  MONTH_NAME:
+    type: string
+    required: false
+    nullable: false
+    role: calendar_attribute
+  DAY:
+    type: integer
+    required: false
+    nullable: false
+    role: calendar_attribute
+  DAY_OF_WEEK:
+    type: string
+    required: false
+    nullable: false
+    role: calendar_attribute
+  DAY_OF_WEEK_NUM:
+    type: integer
+    required: false
+    nullable: false
+    role: calendar_attribute
+  WEEK_OF_YEAR:
+    type: integer
+    required: false
+    nullable: false
+    role: calendar_attribute
+  QUARTER:
+    type: integer
+    required: false
+    nullable: false
+    role: calendar_attribute
+  IS_WEEKEND:
+    type: boolean
+    required: false
+    nullable: false
+    role: calendar_indicator
+  IS_PUBLIC_HOLIDAY:
+    type: boolean
+    required: false
+    nullable: false
+    role: calendar_indicator
+  HOLIDAY_NAME:
+    type: string
+    required: false
+    nullable: true
+    role: holiday_context
+  EVENT_TYPE:
+    type: string
+    required: false
+    nullable: true
+    role: event_context
+  REGION:
+    type: string
+    required: false
+    nullable: false
+    role: calendar_context
+  SOURCE:
+    type: string
+    required: false
+    nullable: false
+    role: source_metadata
+  KNOWN_AT_DATE:
+    type: date
+    required: false
+    nullable: true
+    role: source_metadata
+
+key_expectations:
+  - column: DATE
+    expectation: present, non-null, and unique; one row is expected per calendar date
+
+schema_expectations:
+  expected_column_count: 16
+  missing_required_columns_policy: fail_validation
+  unexpected_columns_policy: report_only
+  unique_columns:
+    - DATE
+
+notes:
+  - Contract describes expected input schema only; it does not clean or transform source data.
+  - DATE is the actual source calendar date field.
+  - Holiday and event context may be unavailable for ordinary dates.

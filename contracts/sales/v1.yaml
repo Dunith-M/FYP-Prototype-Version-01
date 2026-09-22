@@ -1,0 +1,123 @@
+dataset: sales
+version: 1
+source_file: transactions_data.xlsx
+source_sheet: data
+description: >
+  Historical sales/product transaction source used by the Singer FYP MVP.
+
+required_columns:
+  - SALES_DATE
+  - SHOP_CODE
+  - SALES_PART
+  - TOTAL_UNITS
+  - TOTAL_VALUE
+
+columns:
+  YEAR:
+    type: integer
+    required: false
+    nullable: false
+    role: source_reporting_year
+  PERIOD:
+    type: integer
+    required: false
+    nullable: false
+    role: source_reporting_period
+  SALES_DATE:
+    type: datetime
+    required: true
+    nullable: false
+    role: date_source
+  CHANNEL:
+    type: string
+    required: false
+    nullable: false
+    role: sales_context
+  AREA:
+    type: string
+    required: false
+    nullable: false
+    role: sales_context
+  DISTRICT:
+    type: string
+    required: false
+    nullable: false
+    role: sales_context
+  SHOP_CODE:
+    type: string
+    required: true
+    nullable: false
+    role: branch_key
+  SITE_DES:
+    type: string
+    required: false
+    nullable: false
+    role: branch_context
+  BM_AD:
+    type: string
+    required: false
+    nullable: false
+    role: audit_context
+  FAM_DES:
+    type: string
+    required: false
+    nullable: true
+    role: product_family_context
+  SALES_PART:
+    type: string
+    required: true
+    nullable: false
+    role: product_source_key
+  PART_DESC:
+    type: string
+    required: false
+    nullable: false
+    role: product_description_context
+  HIRE_UNITS:
+    type: numeric
+    required: false
+    nullable: false
+    role: sales_component_units
+  HIRE_VAL:
+    type: numeric
+    required: false
+    nullable: false
+    role: sales_component_value
+  CASH_UNITS:
+    type: numeric
+    required: false
+    nullable: false
+    role: sales_component_units
+  CASH_VALUE:
+    type: numeric
+    required: false
+    nullable: false
+    role: sales_component_value
+  TOTAL_UNITS:
+    type: numeric
+    required: true
+    nullable: false
+    role: sales_units_evidence
+  TOTAL_VALUE:
+    type: numeric
+    required: true
+    nullable: false
+    role: sales_value_evidence
+
+key_expectations:
+  - column: SHOP_CODE
+    expectation: present and non-null; not expected to be unique by itself
+  - column: SALES_PART
+    expectation: present and non-null; source product identity is retained as supplied
+  - column: SALES_DATE
+    expectation: present and non-null
+
+schema_expectations:
+  expected_column_count: 18
+  missing_required_columns_policy: fail_validation
+  unexpected_columns_policy: report_only
+
+notes:
+  - Contract describes expected input schema only; it does not clean or transform source data.
+  - TOTAL_UNITS and TOTAL_VALUE are numeric evidence only; zero and negative values are not rejected or reinterpreted by this contract.
+  - SALES_PART is a source product identifier and is not assumed identical to a product-master PRODUCT_CODE for every historical record.

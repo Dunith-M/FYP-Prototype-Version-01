@@ -1,0 +1,2 @@
+source_system,source_product_code,mapping_reason,confidence_class,canonical_product_id,affected_sales_rows,affected_signed_units,affected_absolute_units,reviewer,reviewed_at,notes
+SALES,UNKNOWN,MANUAL_REVIEW,UNRESOLVED,,1,1,1,,,Historical sales code absent from current product master

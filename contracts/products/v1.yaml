@@ -1,0 +1,55 @@
+dataset: products
+version: 1
+source_file: product_data.xlsx
+source_sheet: product_data.csv
+description: >
+  Product-master source used by the Singer FYP MVP.
+
+required_columns:
+  - PRODUCT_CODE
+  - PRODUCT_DESC
+  - PRODUCT_FAMILY_ID
+  - PRODUCT_FAMILY_DESC
+
+columns:
+  PRODUCT_CODE:
+    type: string
+    required: true
+    nullable: false
+    role: product_key
+  PRODUCT_DESC:
+    type: string
+    required: true
+    nullable: false
+    role: product_description
+  PRODUCT_FAMILY_ID:
+    type: string
+    required: true
+    nullable: false
+    role: product_family_key
+  PRODUCT_FAMILY_DESC:
+    type: string
+    required: true
+    nullable: false
+    role: product_family_description
+  PRICE:
+    type: numeric
+    required: false
+    nullable: true
+    role: list_price_evidence
+
+key_expectations:
+  - column: PRODUCT_CODE
+    expectation: present and non-null; expected to identify a product-master record
+  - column: PRODUCT_FAMILY_ID
+    expectation: present and non-null; not expected to be unique by itself
+
+schema_expectations:
+  expected_column_count: 5
+  missing_required_columns_policy: fail_validation
+  unexpected_columns_policy: report_only
+
+notes:
+  - Contract describes expected input schema only; it does not clean or transform source data.
+  - PRICE is selling/list-price evidence only and must not be interpreted as unit cost, margin, profit, or landed cost.
+  - PRICE may be absent, zero, or negative in supplied history; this contract does not correct or reject those values.

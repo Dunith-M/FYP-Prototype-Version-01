@@ -1,0 +1,52 @@
+dataset: inventory
+version: 1
+source_file: inventory_data.xlsx
+source_sheet: inventory_data.csv
+description: >
+  Historical inventory snapshot source used by the Singer FYP MVP.
+
+required_columns:
+  - AS_AT_DATE
+  - PRODUCT_CODE
+  - SITE_ID
+  - QTY
+
+columns:
+  AS_AT_DATE:
+    type: date
+    required: true
+    nullable: false
+    role: snapshot_date
+  PRODUCT_CODE:
+    type: string
+    required: true
+    nullable: false
+    role: product_key
+  SITE_ID:
+    type: string
+    required: true
+    nullable: false
+    role: branch_key
+  QTY:
+    type: numeric
+    required: true
+    nullable: false
+    role: stock_evidence
+
+key_expectations:
+  - column: AS_AT_DATE
+    expectation: present and non-null
+  - column: PRODUCT_CODE
+    expectation: present and non-null; not expected to be unique by itself
+  - column: SITE_ID
+    expectation: present and non-null; not expected to be unique by itself
+
+schema_expectations:
+  expected_column_count: 4
+  missing_required_columns_policy: fail_validation
+  unexpected_columns_policy: report_only
+
+notes:
+  - Contract describes expected input schema only; it does not clean or transform source data.
+  - QTY is observed stock evidence. The contract does not require positive values.
+  - A missing inventory row remains semantically UNKNOWN; it must not be interpreted as zero inventory.

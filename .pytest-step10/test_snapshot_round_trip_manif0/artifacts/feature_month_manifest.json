@@ -1,0 +1,57 @@
+{
+  "artifact_hash": "a5ab53533442e5757ca94064a503318be2b8f882ed40754204c3ad35c09a1b03",
+  "artifact_hash_algorithm": "SHA-256",
+  "artifact_name": "feature_month",
+  "artifact_path": "processed/feature_month.parquet",
+  "column_count": 9,
+  "created_at": "2026-09-18T19:30:00+05:30",
+  "feature_columns": [
+    "lag_1",
+    "valid_price"
+  ],
+  "feature_version": "feature_month_schema_v1",
+  "git_commit": "cc315305b35685bb556b7c56d4cfff2598efaae3",
+  "key_columns": [
+    "branch_code",
+    "canonical_product_id",
+    "year_month"
+  ],
+  "mapping_version": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "max_feature_month": "2026-02",
+  "min_feature_month": "2026-01",
+  "missing_target_row_count": 1,
+  "mode": "HISTORICAL_RESEARCH",
+  "planning_cutoff": "2026-02-28",
+  "row_count": 2,
+  "schema_version": "feature_month_manifest_v1",
+  "sources": {
+    "branches": {
+      "hash": "dce1905351040e792f97d8bba6273802f9053551866071596763170bc5331e12"
+    },
+    "calendar": {
+      "hash": "5152790e278eb89039f8bfaa354b944ec1b44c5d3fc144edc5720c3edc045c73"
+    },
+    "inventory": {
+      "hash": "b11a85b296a90afc460430434a504e7acb04b064575b7277724688af0e59d189"
+    },
+    "products": {
+      "hash": "0a3e27b8ca818264d75c8d816c12922c0e6d1c919204e329c580fbc9429ab4f9"
+    },
+    "sales": {
+      "hash": "e04eb29020eaa961e99d3162635e9fe9585c5a1121bd88784c1378aa8837195c"
+    }
+  },
+  "target_column": "target_next_month",
+  "target_definition": {
+    "meaning": "next-calendar-month observed positive fulfilled sales units proxy for the same branch-product pair",
+    "not_claimed": [
+      "true demand",
+      "unconstrained demand",
+      "lost-sales adjusted demand"
+    ],
+    "source": "fulfilled_positive_units_proxy",
+    "supervised_target": "target_next_month"
+  },
+  "valid_target_row_count": 1,
+  "working_tree_dirty": true
+}

@@ -12,6 +12,9 @@ data/staging/
 data/processed/
 data/artifacts/
 
+# Mapping
+docs/
+
 # Models / outputs
 *.pkl
 *.joblib
@@ -23,3 +26,7 @@ data/artifacts/
 # OS
 .DS_Store
 Thumbs.db
+
+# other
+tmp/
+output/
