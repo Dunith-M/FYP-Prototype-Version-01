@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Candidate Evidence | Singer Product Mix DSS{% endblock %}
+{% block content %}
+    <h1 class="h2">Candidate Evidence</h1>
+    {% include "partials/prototype_banner.html" %}
+
+    {% if run_context %}
+        <section class="card mb-4"><div class="card-body">
+            <h2 class="h5">Selected planning context</h2>
+            <p class="mb-1"><strong>Branch:</strong> {{ run_context.branch }}</p>
+            <p class="mb-1"><strong>Planning month:</strong> {{ run_context.planning_month|date:"F Y" }}</p>
+            <p class="mb-1"><strong>Mode:</strong> {{ mode }}</p>
+            {% if run_context.run_id %}<p class="mb-1"><strong>Run:</strong> #{{ run_context.run_id }} ({{ run_context.run_version }})</p>{% else %}<p class="mb-1"><strong>Run/version:</strong> Historical research context; no decision run is persisted.</p>{% endif %}
+            <p class="mb-0"><strong>Candidate evidence artifact:</strong> {{ candidate_run_versions|join:", "|default:"Not recorded" }}</p>
+        </div></section>
+    {% else %}
+        <form method="get" class="row gy-2 gx-3 align-items-end mb-4">
+            <div class="col-sm-4"><label class="form-label" for="branch">Branch</label><select class="form-select" id="branch" name="branch">{% for branch in branches %}<option value="{{ branch.branch_code }}" {% if branch.branch_code == selected_branch %}selected{% endif %}>{{ branch.branch_code }}</option>{% endfor %}</select></div>
+            <div class="col-sm-4"><label class="form-label" for="month">Planning month</label><select class="form-select" id="month" name="month">{% for month in months %}<option value="{{ month|date:'Y-m' }}" {% if month|date:'Y-m' == selected_month %}selected{% endif %}>{{ month|date:"F Y" }}</option>{% endfor %}</select></div>
+            <div class="col-sm-2"><button class="btn btn-primary w-100" type="submit">Apply</button></div>
+        </form>
+    {% endif %}
+
+    <section class="alert alert-secondary" aria-label="Research-shortlist scope">
+        <strong>RESEARCH SHORTLIST</strong>
+        <div>These products are research candidates supported by historical and peer evidence. They are not Singer-approved introduction decisions.</div>
+    </section>
+
+    {% if candidate_rows %}
+        <p class="text-muted">Showing top {{ candidate_rows|length }} of {{ total_candidates }} saved research candidates, in persisted rank order.</p>
+        <section class="row row-cols-2 row-cols-md-4 g-3 mb-4"><div class="col"><div class="card card-body"><small>Research shortlist</small><strong>{{ total_candidates }}</strong></div></div><div class="col"><div class="card card-body"><small>ADEQUATE shown</small><strong>{{ counts.adequate }}</strong></div></div><div class="col"><div class="card card-body"><small>LIMITED shown</small><strong>{{ counts.limited }}</strong></div></div><div class="col"><div class="card card-body"><small>INSUFFICIENT shown</small><strong>{{ counts.insufficient }}</strong></div></div></section>
+        <div class="card"><div class="card-body"><div class="table-responsive"><table class="table table-sm table-striped align-middle"><thead><tr><th>Rank</th><th>Product</th><th>Description</th><th>Family</th><th>Candidate score</th><th>Peer demand</th><th>Family demand</th><th>Similar branch evidence</th><th>Price fit</th><th>Evidence class</th></tr></thead><tbody>{% for row in candidate_rows %}<tr><td>{{ row.rank }}</td><td>{{ row.product.product_code|default:row.product.canonical_product_id }}<div class="small text-muted">{{ row.product.canonical_product_id }}</div></td><td>{{ row.product.product_desc|default:"Not recorded" }}</td><td>{{ row.product.family_desc|default:"Not recorded" }}</td><td>{{ row.candidate_score|floatformat:3 }}</td><td>{% if row.peer_score is not None %}{{ row.peer_score|floatformat:3 }}{% else %}Not available{% endif %}</td><td>{% if row.family_score is not None %}{{ row.family_score|floatformat:3 }}{% else %}Not available{% endif %}</td><td>{% if row.similar_branch_score is not None %}{{ row.similar_branch_score|floatformat:3 }}{% else %}Not available{% endif %}</td><td>{% if row.price_fit_score is not None %}{{ row.price_fit_score|floatformat:3 }}{% else %}Not available{% endif %}</td><td><span class="badge bg-secondary">{{ row.evidence_class }}</span><div class="small text-muted">{{ row.status }}</div></td></tr>{% endfor %}</tbody></table></div></div></div>
+    {% else %}
+        <div class="alert alert-secondary">No saved research candidate evidence was found for this run/context.</div>
+    {% endif %}
+
+    {% if run_context %}
+        <div class="mt-4 d-flex gap-2">
+            <a class="btn btn-outline-primary" href="{{ forecast_evidence_url }}">&larr; Back to Forecast Evidence</a>
+            <a class="btn btn-primary" href="{{ recommendation_url }}">Continue to Recommendations &rarr;</a>
+        </div>
+    {% endif %}
+{% endblock %}

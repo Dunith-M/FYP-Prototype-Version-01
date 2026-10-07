@@ -45,3 +45,20 @@ Source evidence:
 - `data/artifacts/forecasting/baseline_predictions.parquet`
 - `data/artifacts/forecasting/baseline_metrics.csv`
 - `data/artifacts/forecasting/selected_baseline.json`
+
+## Day 06 — Confidence and uncertainty decision
+
+Core confidence layer: COMPLETE.
+
+Forecast evidence is classified as `ADEQUATE`, `LIMITED`, or `INSUFFICIENT`.
+`INSUFFICIENT` evidence withholds the displayed forecast rather than presenting
+a normal-looking numeric result. `LIMITED` evidence remains available with an
+explicit warning and reason code.
+
+Prediction intervals: DEFERRED.
+
+Saved out-of-fold predictions contain point errors, but the prototype has no
+existing uncertainty helper, interval convention, or approved coverage level.
+Adding a residual interval would introduce a new research assumption and
+forecast-output design beyond the 10-day MVP scope. The deterministic evidence
+classification and abstention layer satisfies the current core requirement.

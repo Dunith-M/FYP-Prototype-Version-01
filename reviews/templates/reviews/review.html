@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Review Recommendation Plan | Singer Product Mix DSS{% endblock %}
+{% block content %}
+    <h1 class="h2">Review Recommendation Plan</h1>
+    {% include "partials/prototype_banner.html" %}
+
+    {% if messages %}{% for message in messages %}
+        <div class="alert alert-success" role="status">{{ message }}</div>
+    {% endfor %}{% endif %}
+    {% if saved_review_id %}<div class="alert alert-success" role="status">Review saved successfully.</div>{% endif %}
+
+    <section class="card mb-4"><div class="card-body">
+        <h2 class="h5">Run Information</h2>
+        <dl class="row mb-0 small">
+            <dt class="col-sm-3">Run ID</dt><dd class="col-sm-9">{{ run.run_version }} <span class="text-muted">(#{{ run.pk }})</span></dd>
+            <dt class="col-sm-3">Branch</dt><dd class="col-sm-9">{{ branch_code }}{% if branch %} &mdash; {{ branch.branch_name }}{% endif %}</dd>
+            <dt class="col-sm-3">Planning month</dt><dd class="col-sm-9">{{ run.planning_month|date:"F Y" }}</dd>
+            <dt class="col-sm-3">Mode</dt><dd class="col-sm-9">{{ mode }}</dd>
+            <dt class="col-sm-3">Scenario version</dt><dd class="col-sm-9">{{ run.scenario_version }}</dd>
+            <dt class="col-sm-3">Solver / feasibility</dt><dd class="col-sm-9">{{ run.solver_status }} / {{ run.feasibility_status }}</dd>
+        </dl>
+    </div></section>
+
+    {% if blocked_message %}
+        <div class="alert alert-danger"><strong>{{ blocked_message }}</strong><div class="mt-1">{{ gate.code }}: {{ gate.reasons|join:" " }}</div></div>
+    {% else %}
+        <section class="card mb-4"><div class="card-body">
+            <h2 class="h5">Saved Recommendation Evidence</h2>
+            <p class="small text-muted">These are saved Day-08 research/demo outputs for this exact run. Forecast quantity is shown only when stored with this run; it is not recalculated here.</p>
+            <div class="table-responsive"><table class="table table-sm table-striped align-middle"><thead><tr><th>Product</th><th>Action / status</th><th>q0 demo</th><th>q1 demo</th><th>Forecast evidence</th><th>Candidate evidence</th><th>Reasons</th></tr></thead><tbody>{% for row in recommendation_rows %}<tr>
+                <td>{{ row.product.product_code }}<div class="small text-muted">{{ row.product.product_desc }} · {{ row.product.canonical_product_id }}</div></td>
+                <td>{% if row.action %}<span class="badge bg-primary">{{ row.action }}</span>{% else %}{{ row.status }}{% endif %}</td>
+                <td>{% if row.selected_option and row.selected_option.q0 is not None %}{{ row.selected_option.q0 }}{% else %}Not available{% endif %}</td>
+                <td>{% if row.selected_option %}{{ row.selected_option.q1 }}{% else %}Not available{% endif %}</td>
+                <td>Not available in saved run-linked results</td>
+                <td>{% if row.candidate_evidence %}Score {{ row.candidate_evidence.candidate_score|floatformat:3 }}<div class="small text-muted">{{ row.candidate_evidence.evidence_class }}</div>{% elif row.selected_option %}Decision evidence {{ row.selected_option.evidence_score|default:"Not available" }}<div class="small text-muted">{{ row.selected_option.evidence_source }}</div>{% else %}Not available{% endif %}</td>
+                <td>{% if row.reason_texts %}<ul class="mb-0 ps-3">{% for reason in row.reason_texts %}<li>{{ reason }}</li>{% endfor %}</ul>{% else %}Not recorded{% endif %}</td>
+            </tr>{% empty %}<tr><td colspan="7" class="text-muted">No saved recommendation rows were found for this checked run.</td></tr>{% endfor %}</tbody></table></div>
+        </div></section>
+
+        <section class="card mb-4"><div class="card-body">
+            <h2 class="h5">Current Human Review</h2>
+            <dl class="row mb-0 small">
+                <dt class="col-sm-3">Review status</dt><dd class="col-sm-9"><span class="badge bg-secondary">{{ review_status }}</span></dd>
+                {% if latest_review %}
+                    <dt class="col-sm-3">Machine recommendation</dt><dd class="col-sm-9">Saved machine plan: {{ recommendation_rows|length }} product action(s). Exact machine actions remain visible in the evidence table above.</dd>
+                    <dt class="col-sm-3">Human decision</dt><dd class="col-sm-9">{{ latest_review.decision }}</dd>
+                    <dt class="col-sm-3">Reviewer</dt><dd class="col-sm-9">{{ latest_review.reviewer }}</dd>
+                    <dt class="col-sm-3">Comment</dt><dd class="col-sm-9">{{ latest_review.comment }}</dd>
+                    <dt class="col-sm-3">Timestamp</dt><dd class="col-sm-9">{{ latest_review.reviewed_at|date:"Y-m-d H:i" }}</dd>
+                {% else %}
+                    <dt class="col-sm-3">Human decision</dt><dd class="col-sm-9">Not recorded</dd>
+                {% endif %}
+            </dl>
+            {% if latest_review %}
+                <a class="btn btn-outline-success btn-sm mt-3" href="{% url 'reviews:export_reviewed_run_csv' run.pk %}">Export CSV</a>
+            {% else %}
+                <p class="small text-muted mt-3 mb-0">CSV export becomes available after a persisted human review for this exact run.</p>
+            {% endif %}
+        </div></section>
+
+        <section class="card mb-4"><div class="card-body">
+            <h2 class="h5">Review Decision</h2>
+            <p class="small text-muted">Your review is saved as a separate historical event. MODIFY records a requested change only; it does not change q1 or rerun optimization.</p>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% for field in form %}<div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="text-danger small">{{ field.errors|join:", " }}</div>{% endif %}</div>{% endfor %}
+                <button class="btn btn-primary" type="submit">Save Review</button>
+            </form>
+        </div></section>
+    {% endif %}
+
+    <section class="card mb-4"><div class="card-body">
+        <h2 class="h5">Review History</h2>
+        {% if review_history %}<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Decision</th><th>Reviewer</th><th>Timestamp</th><th>Comment</th></tr></thead><tbody>{% for review in review_history %}<tr><td>{{ review.decision }}</td><td>{{ review.reviewer }}</td><td>{{ review.reviewed_at|date:"Y-m-d H:i" }}</td><td>{{ review.comment }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="mb-0 text-muted">No review decisions have been recorded for this run.</p>{% endif %}
+    </div></section>
+
+    <a class="btn btn-outline-primary" href="{% url 'planning:recommendation_table' %}?result={{ run.pk }}">&larr; Back to Recommendations</a>
+{% endblock %}

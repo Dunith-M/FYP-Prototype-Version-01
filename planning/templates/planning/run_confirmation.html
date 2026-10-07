@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Scenario Run Status | Singer Product Mix DSS{% endblock %}
+{% block content %}
+    <h1 class="h2">Scenario Run Status</h1>
+    {% include "partials/prototype_banner.html" %}
+
+    {% if result and mode == 'RESEARCH_SYNTHETIC' %}
+        <div class="alert {% if result.feasibility_status == 'PASS' %}alert-success{% else %}alert-warning{% endif %}" role="status">
+            <strong>Synthetic scenario run recorded.</strong>
+            The status below is research/demo output, not Singer-approved operational advice.
+        </div>
+        <dl class="row card card-body">
+            <dt class="col-sm-4">Run ID</dt><dd class="col-sm-8">{{ result.pk }}</dd>
+            <dt class="col-sm-4">Planning month</dt><dd class="col-sm-8">{{ result.planning_month|date:"F Y" }}</dd>
+            <dt class="col-sm-4">Scenario version</dt><dd class="col-sm-8">{{ result.scenario_version }}</dd>
+            <dt class="col-sm-4">Run version</dt><dd class="col-sm-8">{{ result.run_version }}</dd>
+            <dt class="col-sm-4">Solver status</dt><dd class="col-sm-8">{{ result.solver_status }}</dd>
+            <dt class="col-sm-4">Independent feasibility</dt><dd class="col-sm-8">{{ result.feasibility_status }}</dd>
+            <dt class="col-sm-4">Recommendation outputs</dt><dd class="col-sm-8">{{ result.recommendations.count }}</dd>
+        </dl>
+    {% elif result %}
+        <div class="alert alert-warning" role="status">The persisted run has no identified prototype mode. It is not displayed as a recommendation result.</div>
+    {% elif mode == 'HISTORICAL' %}
+        <div class="alert alert-success" role="status">
+            <strong>Historical research context verified.</strong>
+            Persisted forecast and candidate evidence was checked for {{ historical_branch }} / {{ historical_month }}. No synthetic optimization or action generation was run.
+        </div>
+    {% else %}
+        <div class="alert alert-warning" role="status">The requested scenario run was not found.</div>
+    {% endif %}
+
+    <a class="btn btn-outline-primary" href="{% url 'planning:run_scenario' %}">Run another scenario</a>
+{% endblock %}

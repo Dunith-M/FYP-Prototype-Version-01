@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Data Status | Singer Product Mix DSS{% endblock %}
+{% block content %}
+    <h1 class="h2">Data Status</h1>
+    {% include "partials/prototype_banner.html" %}
+    <p class="text-muted">Registered source datasets and their persisted validation state for the research prototype.</p>
+
+    {% if not registered_source_file_count %}
+        <div class="alert alert-secondary" role="status">No source files have been registered yet.</div>
+    {% endif %}
+
+    <section class="card">
+        <div class="card-body">
+            <h2 class="h5">Current registered source versions</h2>
+            <p class="small text-muted">Each row shows the latest persisted record for its dataset. Registration counts make retained version history visible. Date coverage is not currently persisted.</p>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Dataset</th>
+                            <th>Filename</th>
+                            <th>Rows</th>
+                            <th>Coverage</th>
+                            <th>Contract</th>
+                            <th>Imported</th>
+                            <th>Status</th>
+                            <th>Hash</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in dataset_rows %}
+                        <tr>
+                            <th scope="row">
+                                {{ row.dataset_label }}
+                                {% if row.version_count %}
+                                    <div class="small text-muted">Latest of {{ row.version_count }} registered version{{ row.version_count|pluralize }}</div>
+                                {% endif %}
+                            </th>
+                            {% if row.source_file %}
+                                <td>{{ row.source_file.filename }}</td>
+                                <td>{{ row.source_file.row_count }}</td>
+                                <td>Not recorded</td>
+                                <td>{{ row.source_file.contract_version }}</td>
+                                <td>{{ row.source_file.uploaded_at|date:"Y-m-d H:i" }}</td>
+                                <td><span class="badge bg-secondary">{{ row.source_file.status }}</span></td>
+                                <td><code title="{{ row.source_file.file_hash }}">{{ row.source_file.file_hash|slice:":12" }}&hellip;</code></td>
+                            {% else %}
+                                <td>Not registered</td>
+                                <td>Not recorded</td>
+                                <td>Not recorded</td>
+                                <td>Not recorded</td>
+                                <td>Not recorded</td>
+                                <td>Not registered</td>
+                                <td>Not recorded</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <div class="mt-4">
+        <a class="btn btn-outline-primary" href="{% url 'data_quality' %}">
+            Continue to Mapping &amp; Data Quality
+        </a>
+    </div>
+{% endblock %}

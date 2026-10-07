@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Recommendations | Singer Product Mix DSS{% endblock %}
+{% block content %}
+    <h1 class="h2">Recommendation Results</h1>
+    {% include "partials/prototype_banner.html" %}
+
+    <section class="card mb-4"><div class="card-body">
+        <h2 class="h5">Run Information</h2>
+        <dl class="row mb-0 small">
+            {% if result %}
+                <dt class="col-sm-3">Run ID</dt><dd class="col-sm-9">{{ run_context.run_version }} <span class="text-muted">(#{{ run_context.run_id }})</span></dd>
+            {% else %}
+                <dt class="col-sm-3">Run ID</dt><dd class="col-sm-9">Not available for Historical evidence context</dd>
+            {% endif %}
+            <dt class="col-sm-3">Planning month</dt><dd class="col-sm-9">{{ run_context.planning_month|date:"F Y" }}</dd>
+            <dt class="col-sm-3">Branch</dt><dd class="col-sm-9">{{ run_context.branch_code }}{% if run_provenance %} &mdash; {{ run_provenance.branch.branch_name }}{% endif %}</dd>
+            <dt class="col-sm-3">Mode</dt><dd class="col-sm-9">{% if run_provenance %}{{ run_provenance.mode }}{% else %}{{ mode }}{% endif %}</dd>
+            {% if result %}
+                <dt class="col-sm-3">Model version</dt><dd class="col-sm-9">{% if run_provenance %}{{ run_provenance.model_version }} <span class="text-muted">({{ run_provenance.selected_model }})</span>{% else %}Not recorded (legacy run){% endif %}</dd>
+                <dt class="col-sm-3">Mapping version</dt><dd class="col-sm-9">{% if run_provenance %}{{ run_provenance.mapping_version }}{% else %}Not recorded (legacy run){% endif %}</dd>
+                <dt class="col-sm-3">Scenario version</dt><dd class="col-sm-9">{{ result.scenario_version }}</dd>
+                <dt class="col-sm-3">Solver</dt><dd class="col-sm-9">{{ result.solver_status }}</dd>
+                <dt class="col-sm-3">Independent feasibility</dt><dd class="col-sm-9">{{ result.feasibility_status }}</dd>
+                <dt class="col-sm-3">Current review status</dt><dd class="col-sm-9"><span class="badge bg-secondary">{{ review_status }}</span></dd>
+            {% else %}
+                <dt class="col-sm-3">Scenario version</dt><dd class="col-sm-9">Not applicable for Historical evidence context</dd>
+            {% endif %}
+        </dl>
+        {% if result and run_provenance %}
+            <p class="mt-3 mb-0 small text-muted">Frozen source snapshot: {{ run_provenance.source_snapshot|length }} datasets; source-manifest SHA-256 {{ run_provenance.source_manifest_hash|slice:":12" }}&hellip;</p>
+        {% elif result %}
+            <p class="mt-3 mb-0 small text-muted"><strong>Run provenance:</strong> LEGACY / NOT CAPTURED. Existing results are not backfilled with guessed source, mapping, model, or configuration metadata.</p>
+        {% endif %}
+    </div></section>
+
+    {% if blocked_message %}
+        <div class="alert alert-danger"><strong>{{ blocked_message }}</strong>{% if recommendation_gate %}<div class="mt-1">{{ recommendation_gate.code }}: {{ recommendation_gate.reasons|join:" " }}</div>{% endif %}</div>
+    {% elif not result %}
+        <div class="alert alert-secondary">No decision recommendations were produced for this Historical Research run. This context contains analytics evidence, not decision actions.</div>
+    {% elif not recommendation_rows %}
+        <div class="alert alert-secondary">No saved recommendations were found for this run.</div>
+    {% else %}
+        <section class="row row-cols-2 row-cols-md-4 row-cols-xl-7 g-2 mb-4" aria-label="Saved action counts">
+            <div class="col"><div class="card card-body"><small>Total</small><strong>{{ recommendation_rows|length }}</strong></div></div>
+            <div class="col"><div class="card card-body"><small>Increase</small><strong>{{ counts.INCREASE }}</strong></div></div>
+            <div class="col"><div class="card card-body"><small>Keep</small><strong>{{ counts.KEEP }}</strong></div></div>
+            <div class="col"><div class="card card-body"><small>Reduce</small><strong>{{ counts.REDUCE }}</strong></div></div>
+            <div class="col"><div class="card card-body"><small>Remove</small><strong>{{ counts.REMOVE }}</strong></div></div>
+            <div class="col"><div class="card card-body"><small>Introduce</small><strong>{{ counts.INTRODUCE }}</strong></div></div>
+            <div class="col"><div class="card card-body"><small>Do not introduce</small><strong>{{ counts.DO_NOT_INTRODUCE }}</strong></div></div>
+        </section>
+        <section class="card"><div class="card-body">
+            <h2 class="h5">Saved recommendation outputs</h2>
+            <p class="small mb-2"><strong>Current Review Status:</strong> <span class="badge bg-secondary">{{ review_status }}</span></p>
+            <p class="small text-muted">Actions and reasons below are saved Day-08 outputs. The research evidence score is a non-financial proxy, not a profit or revenue estimate.</p>
+            <div class="table-responsive"><table class="table table-sm table-striped align-middle"><thead><tr><th>Product</th><th>Family</th><th>L0 demo</th><th>L1 demo</th><th>q0 demo</th><th>q1 demo</th><th>Action / status</th><th>Evidence score (proxy)</th><th>Evidence source</th><th>Reason</th></tr></thead><tbody>{% for row in recommendation_rows %}<tr><td>{{ row.product.product_code }}<div class="small text-muted">{{ row.product.product_desc }} · {{ row.product.canonical_product_id }}</div></td><td>{{ row.product.family_desc|default:"Not recorded" }}</td><td>{% if row.selected_option %}{{ row.selected_option.l0|yesno:"Listed,Unlisted" }}{% else %}Not available{% endif %}</td><td>{% if row.selected_option %}{{ row.selected_option.l1|yesno:"Listed,Unlisted" }}{% else %}Not available{% endif %}</td><td>{% if row.selected_option %}{% if row.selected_option.q0 is not None %}{{ row.selected_option.q0 }}{% else %}Not available{% endif %}{% else %}Not available{% endif %}</td><td>{% if row.selected_option %}{{ row.selected_option.q1 }}{% else %}Not available{% endif %}</td><td>{% if row.action %}<span class="badge bg-primary">{{ row.action }}</span>{% else %}<span class="badge bg-secondary">{{ row.status }}</span>{% endif %}<div class="small text-muted">{{ row.status }}</div></td><td>{% if row.selected_option and row.selected_option.evidence_score is not None %}{{ row.selected_option.evidence_score|floatformat:3 }}{% else %}Not available{% endif %}</td><td>{% if row.selected_option %}{{ row.selected_option.evidence_source }}{% else %}Not recorded{% endif %}</td><td>{{ row.primary_reason }}{% if row.reason_texts|length > 1 %}<details class="mt-1"><summary>All saved reasons</summary><ul class="mb-0 mt-1">{% for reason in row.reason_texts %}<li>{{ reason }}</li>{% endfor %}</ul></details>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+        </div></section>
+    {% endif %}
+
+    <a class="btn btn-outline-primary mt-4" href="{{ candidate_evidence_url }}">&larr; Back to Candidate Evidence</a>
+    {% if result and recommendation_gate.allowed and recommendation_rows %}<a class="btn btn-primary mt-4" href="{% url 'reviews:review_run' result.pk %}">Review this plan &rarr;</a>{% endif %}
+{% endblock %}

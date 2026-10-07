@@ -1,0 +1,16 @@
+{% if mode == "RESEARCH_SYNTHETIC" or mode == "SYNTHETIC_DEMO" %}
+    <div class="alert alert-info border-info" role="alert">
+        <strong>SYNTHETIC DECISION DEMO &mdash; L0/q0 AND CONSTRAINTS ARE DEMONSTRATION VALUES</strong>
+        <div class="mt-1">Synthetic values are for research demonstration only and are not Singer-approved policy.</div>
+    </div>
+{% elif mode == "HISTORICAL" or mode == "HISTORICAL_RESEARCH" or mode == "HISTORICAL_EVIDENCE" %}
+    <div class="alert alert-warning border-warning" role="alert">
+        <strong>HISTORICAL / RESEARCH PROTOTYPE &mdash; NOT CURRENT OPERATIONAL ADVICE</strong>
+        <div class="mt-1">This output is based on historical data for research/prototype use and is not a current Singer operational recommendation.</div>
+    </div>
+{% else %}
+    <div class="alert alert-warning border-warning" role="alert">
+        <strong>PROTOTYPE MODE NOT IDENTIFIED &mdash; NOT CURRENT OPERATIONAL ADVICE</strong>
+        <div class="mt-1">This output must be treated as research/prototype material until its persisted mode is available.</div>
+    </div>
+{% endif %}

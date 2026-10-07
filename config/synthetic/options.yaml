@@ -1,0 +1,13 @@
+# SYNTHETIC DEMO ONLY. Not Singer-approved operational policy.
+mode: RESEARCH_SYNTHETIC
+parameter_source: SYNTHETIC_DEMO
+delta: 0
+default_quantity_step: 1
+max_target_per_product: 5
+
+constraints:
+  max_skus_per_branch: 150
+  max_introductions_per_branch: 5
+  category_minimums: {}
+  budget_limit: null
+  space_limit: null

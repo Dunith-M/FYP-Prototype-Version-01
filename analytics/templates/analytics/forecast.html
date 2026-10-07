@@ -1,19 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historical Forecast Evidence</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<main class="container py-4">
-    <span class="badge bg-warning text-dark fs-6 mb-3">HISTORICAL / RESEARCH PROTOTYPE</span>
-    <h1 class="h2">Historical Forecast Evidence</h1>
-    <p class="text-muted">Historical forecasting evidence only. Not current operational advice.</p>
+{% extends "base.html" %}
+{% block title %}Forecast Evidence | Singer Product Mix DSS{% endblock %}
+{% block content %}
+    <h1 class="h2">Forecast Evidence</h1>
+    {% include "partials/prototype_banner.html" %}
+
+    {% if run_context %}
+        <section class="card mb-4"><div class="card-body">
+            <h2 class="h5">Selected planning context</h2>
+            <p class="mb-1"><strong>Branch:</strong> {{ run_context.branch }}</p>
+            <p class="mb-1"><strong>Planning month:</strong> {{ run_context.planning_month|date:"F Y" }}</p>
+            <p class="mb-1"><strong>Mode:</strong> {{ mode }}</p>
+            {% if run_context.run_id %}<p class="mb-1"><strong>Run:</strong> #{{ run_context.run_id }} ({{ run_context.run_version }})</p>{% else %}<p class="mb-1"><strong>Run/version:</strong> Historical research context; no decision run is persisted.</p>{% endif %}
+            {% if not context_forecast_available %}<p class="mb-0 small text-muted">Saved forecast artifact validation months: {{ artifact_validation_months|join:", " }}.</p>{% endif %}
+        </div></section>
+    {% endif %}
 
     {% if artifact_available %}
-        <form method="get" class="row gy-2 gx-3 align-items-end mb-4">
+        {% if not run_context %}<form method="get" class="row gy-2 gx-3 align-items-end mb-4">
             <div class="col-sm-4">
                 <label class="form-label" for="branch">Branch</label>
                 <select class="form-select" id="branch" name="branch">
@@ -33,36 +36,47 @@
                 </select>
             </div>
             <div class="col-sm-2"><button class="btn btn-primary w-100" type="submit">Apply</button></div>
-        </form>
+        </form>{% endif %}
 
         <section class="card mb-4">
             <div class="card-body">
-                <h2 class="h5">Selected baseline</h2>
+                <h2 class="h5">Selected forecasting model</h2>
                 <p class="mb-1"><strong>Model selected:</strong> {{ selected_model }}</p>
                 <p class="mb-1"><strong>Overall MAE:</strong> {{ overall_mae|floatformat:2 }}</p>
                 <p class="mb-0"><strong>Overall WAPE:</strong> {{ overall_wape_display }}</p>
             </div>
         </section>
 
+        {% if evidence_counts %}
+            <section class="row g-3 mb-4" aria-label="Saved evidence summary">
+                <div class="col-md-4"><div class="card"><div class="card-body"><strong>ADEQUATE</strong><div>{{ evidence_counts.ADEQUATE }}</div></div></div></div>
+                <div class="col-md-4"><div class="card"><div class="card-body"><strong>LIMITED</strong><div>{{ evidence_counts.LIMITED }}</div></div></div></div>
+                <div class="col-md-4"><div class="card"><div class="card-body"><strong>INSUFFICIENT</strong><div>{{ evidence_counts.INSUFFICIENT }}</div></div></div></div>
+            </section>
+        {% endif %}
+
         <section class="card">
             <div class="card-body">
                 <h2 class="h5">Forecast Evidence</h2>
+                <p class="small text-muted">Evidence indicates the quality of support behind each forecast. INSUFFICIENT forecasts are withheld rather than shown as confident predictions.</p>
                 {% if filter_message %}<div class="alert alert-warning">{{ filter_message }}</div>{% endif %}
                 {% if rows_truncated %}
                     <div class="alert alert-info">Showing the first 100 of {{ total_matching_rows }} matching evidence rows.</div>
                 {% endif %}
                 <div class="table-responsive">
                     <table class="table table-sm table-striped align-middle">
-                        <thead><tr><th>Product</th><th>Family</th><th>Predicted units</th><th>Actual units</th><th>Model used</th><th>Absolute error</th><th>Fallback</th></tr></thead>
+                        <thead><tr><th>Product</th><th>Description</th><th>Family</th><th>Actual</th><th>Forecast</th><th>Model</th><th>Evidence</th><th>Error</th></tr></thead>
                         <tbody>
                         {% for row in forecast_rows %}
                             <tr>
-                                <td>{{ row.product }}</td><td>{{ row.family }}</td>
-                                <td>{{ row.predicted_units|floatformat:2 }}</td><td>{{ row.actual_units|floatformat:2 }}</td>
-                                <td>{{ row.model_name }}</td><td>{{ row.absolute_error|floatformat:2 }}</td><td>{{ row.fallback }}</td>
+                                <td>{% if row.product_code != "â€”" %}{{ row.product_code }}<div class="small text-muted">{{ row.product }}</div>{% else %}{{ row.product }}{% endif %}</td><td>{{ row.product_description }}</td><td>{{ row.family }}</td>
+                                <td>{{ row.actual_units }}</td><td>{{ row.forecast }}</td>
+                                <td>{{ row.model_name }}</td>
+                                <td><span class="badge {{ row.evidence_badge_class }}">{{ row.evidence_class }}</span>{% if row.evidence_reason %}<div class="small text-muted mt-1">Reason: {{ row.evidence_reason }}</div>{% endif %}</td>
+                                <td>{{ row.absolute_error }}</td>
                             </tr>
                         {% empty %}
-                            <tr><td colspan="7" class="text-muted">No forecast evidence matches the selected filters.</td></tr>
+                            <tr><td colspan="8" class="text-muted">No saved forecast evidence matches the selected context.</td></tr>
                         {% endfor %}
                         </tbody>
                     </table>
@@ -72,6 +86,10 @@
     {% else %}
         <div class="alert alert-warning">{{ artifact_message }}</div>
     {% endif %}
-</main>
-</body>
-</html>
+    {% if run_context %}
+        <div class="mt-4 d-flex gap-2">
+            <a class="btn btn-outline-primary" href="{% url 'planning:run_scenario' %}">&larr; Back to Run Scenario</a>
+            <a class="btn btn-primary" href="{{ candidate_evidence_url }}">Continue to Candidate Evidence &rarr;</a>
+        </div>
+    {% endif %}
+{% endblock %}

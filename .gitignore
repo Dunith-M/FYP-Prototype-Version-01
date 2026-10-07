@@ -19,6 +19,8 @@ docs/
 *.pkl
 *.joblib
 *.parquet
+*.xlsx
+*.csv
 
 # IDE
 .vscode/

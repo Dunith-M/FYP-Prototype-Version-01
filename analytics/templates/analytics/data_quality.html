@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Mapping &amp; Data Quality | Singer Product Mix DSS{% endblock %}
+{% block content %}
+    <h1 class="h2">Mapping &amp; Data Quality</h1>
+    {% include "partials/prototype_banner.html" %}
+    <p class="text-muted">Summary of canonical mapping coverage, validation results, and unresolved data-quality issues used by the research prototype.</p>
+
+    {% if not data_available %}
+        <div class="alert alert-secondary" role="status">No persisted mapping or data-quality reports are available yet.</div>
+    {% endif %}
+
+    <section class="mb-4">
+        <h2 class="h4">Mapping Summary</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card h-100"><div class="card-body">
+                    <h3 class="h5">Branch Mapping</h3>
+                    <p class="mb-1"><strong>{{ branch_mapping.coverage }}</strong> pilot-branch reference coverage</p>
+                    <p class="mb-1">Mapped branches: {{ branch_mapping.mapped }} of {{ branch_mapping.expected }}</p>
+                    <p class="mb-2">Unmatched branches: {{ branch_mapping.unmatched }}</p>
+                    <span class="badge {{ branch_mapping.badge_class }}">{{ branch_mapping.status }}</span>
+                </div></div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100"><div class="card-body">
+                    <h3 class="h5">Product / SKU Mapping</h3>
+                    {% if product_mapping %}
+                        <p class="mb-1"><strong>{{ product_mapping.coverage }}</strong> distinct source-code coverage</p>
+                        <p class="mb-1">Mapped product codes: {{ product_mapping.mapped }} of {{ product_mapping.total }}</p>
+                        <p class="mb-0">Unresolved product codes: {{ product_mapping.unresolved }}</p>
+                    {% else %}
+                        <p class="mb-0">Not available in persisted mapping reports.</p>
+                    {% endif %}
+                </div></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-4">
+        <h2 class="h4">Data Quality Summary</h2>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle bg-white">
+                <thead><tr><th>Metric</th><th>Persisted result</th><th>Status</th><th>Evidence note</th></tr></thead>
+                <tbody>
+                {% for metric in quality_metrics %}
+                    <tr><th scope="row">{{ metric.label }}</th><td>{{ metric.value }}</td><td><span class="badge {{ metric.badge_class }}">{{ metric.status }}</span></td><td class="small">{{ metric.notes }}</td></tr>
+                {% empty %}
+                    <tr><td colspan="4">No persisted data-quality summary metrics are available.</td></tr>
+                {% endfor %}
+                <tr><th scope="row">UNKNOWN inventory observations</th><td>{{ unknown_inventory }}</td><td><span class="badge bg-secondary">NOT AVAILABLE</span></td><td class="small">The current saved reports preserve UNKNOWN semantics but do not persist an observation count for this page.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="mb-4">
+        <h2 class="h4">Unresolved Product Mappings</h2>
+        <p class="text-muted">Unresolved codes remain unresolved; no product-description similarity or automatic mapping is applied.</p>
+        {% if unresolved_rows %}
+            <p class="small">Showing {{ unresolved_rows|length }} of {{ unresolved_total }} persisted unresolved codes.</p>
+            <div class="table-responsive"><table class="table table-sm table-striped align-middle bg-white">
+                <thead><tr><th>Source Product Code</th><th>Affected Rows</th><th>Affected Signed Units</th><th>Mapping Status</th><th>Notes</th></tr></thead>
+                <tbody>{% for row in unresolved_rows %}<tr><td><code>{{ row.source_product_code }}</code></td><td>{{ row.affected_sales_rows }}</td><td>{{ row.affected_signed_units }}</td><td><span class="badge bg-warning text-dark">{{ row.confidence_class }}</span></td><td class="small">{{ row.notes }}</td></tr>{% endfor %}</tbody>
+            </table></div>
+        {% else %}
+            <div class="alert alert-secondary">No persisted unresolved-product mapping records are available.</div>
+        {% endif %}
+    </section>
+
+    <section>
+        <h2 class="h4">Important Safety / Validation Results</h2>
+        <div class="list-group">
+            {% for check in safety_checks %}
+                <div class="list-group-item"><div class="d-flex justify-content-between gap-3"><strong>{{ check.label }}</strong><span class="badge {{ check.badge_class }}">{{ check.status }}</span></div><div class="small text-muted mt-1">{{ check.detail }}</div></div>
+            {% endfor %}
+        </div>
+    </section>
+    <div class="mt-4">
+        <a class="btn btn-outline-primary" href="{% url 'planning:run_scenario' %}">
+            Continue to Run Scenario
+        </a>
+    </div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Run Scenario | Singer Product Mix DSS{% endblock %}
+{% block content %}
+    <h1 class="h2">Run Scenario</h1>
+    {% include "partials/prototype_banner.html" %}
+    <p class="text-muted">Select the planning context for this research prototype. Historical mode checks saved evidence. Synthetic mode may execute or reuse the saved optimization workflow.</p>
+
+    {% if pipeline_error %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Scenario run could not complete.</strong> {{ pipeline_error }}
+        </div>
+    {% endif %}
+
+    {% if not form.has_branches %}
+        <div class="alert alert-secondary" role="status">No pilot branches are currently registered.</div>
+    {% endif %}
+    {% if not form.has_planning_months %}
+        <div class="alert alert-secondary" role="status">No supported planning months are currently available.</div>
+    {% endif %}
+
+    <section class="card shadow-sm">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.planning_month.id_for_label }}">{{ form.planning_month.label }}</label>
+                    <select class="form-select{% if form.planning_month.errors %} is-invalid{% endif %}" name="{{ form.planning_month.html_name }}" id="{{ form.planning_month.id_for_label }}" required>
+                        <option value="">Select a planning month</option>
+                        {% for value, label in form.planning_month.field.choices %}
+                            <option value="{{ value }}" {% if form.planning_month.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.planning_month.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    <div class="form-text">{{ form.planning_month.help_text }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.branch.id_for_label }}">{{ form.branch.label }}</label>
+                    <select class="form-select{% if form.branch.errors %} is-invalid{% endif %}" name="{{ form.branch.html_name }}" id="{{ form.branch.id_for_label }}" required>
+                        <option value="">Select a pilot branch</option>
+                        {% for value, label in form.branch.field.choices %}
+                            {% if value %}<option value="{{ value }}" {% if form.branch.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>{% endif %}
+                        {% endfor %}
+                    </select>
+                    {% for error in form.branch.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.mode.id_for_label }}">{{ form.mode.label }}</label>
+                    <select class="form-select{% if form.mode.errors %} is-invalid{% endif %}" name="{{ form.mode.html_name }}" id="{{ form.mode.id_for_label }}" required>
+                        <option value="">Select a mode</option>
+                        {% for value, label in form.mode.field.choices %}
+                            <option value="{{ value }}" {% if form.mode.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.mode.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    <div class="form-text"><strong>Historical / Research Analytics:</strong> historical evidence only. <strong>Synthetic Decision Demo:</strong> uses clearly labelled demonstration planning assumptions where approved Singer inputs are unavailable.</div>
+                </div>
+
+                <button class="btn btn-primary" type="submit"{% if not form.has_branches or not form.has_planning_months %} disabled{% endif %}>Run Scenario</button>
+            </form>
+        </div>
+    </section>
+{% endblock %}

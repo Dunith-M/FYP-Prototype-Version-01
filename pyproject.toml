@@ -44,3 +44,4 @@ dev = [
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
+testpaths = ["tests", "analytics/tests", "planning/tests"]
